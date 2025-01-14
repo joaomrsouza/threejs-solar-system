@@ -5,15 +5,22 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 const TEXTURE_SIZE = ["2k", "8k"][0];
 const INITIAL_ZOOM = 200;
 const SUN_SCALE = 50;
-const ANIMATION_SPEED = 0.001;
-
 const AMBIENT_LIGHT_INTENSITY = 0.1; // DEFAULT: 0.1
 const SPACE_LIGHT_INTENSITY = 100; // DEFAULT: 100
 const SUN_LIGHT_INTENSITY = 5; // DEFAULT: 5
 
+// Animation parameters
+const ANIMATION = {
+  SPEED: 0.001,
+};
+
 const DEBUG = {
+  // Animation parameters
   DISABLE_TRANSLATION: false, // DEFAULT: false
-  FOCUS_ON_INDEX: false, // DEFAULT: false
+  DISABLE_ROTATION: false, // DEFAULT: false
+  FOCUS_ON_INDEX: 0, // DEFAULT: false
+
+  // CONSTANTS
   AXIS_SIZE: 10000, // DEFAULT: 0
 };
 
@@ -25,7 +32,8 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   50000
 );
-camera.position.z = INITIAL_ZOOM;
+camera.position.set(0, 0, INITIAL_ZOOM);
+camera.rotation.set(0, 0, 0);
 
 // Renderizador
 const renderer = new THREE.WebGLRenderer();
@@ -126,7 +134,12 @@ function animate() {
         planetInfo.orbitRadius * Math.sin(planetInfo.angle);
     }
 
-    if (index === DEBUG.FOCUS_ON_INDEX) {
+    // Rotaciona o planeta
+    if (!DEBUG.DISABLE_ROTATION) {
+      planetInfo.planet.rotation.y += ANIMATION.SPEED;
+    }
+
+    if (index + 1 === DEBUG.FOCUS_ON_INDEX) {
       // Define o vetor para aproximar a câmera do planeta
       const focusOffset = new THREE.Vector3().subVectors(
         camera.position,
@@ -139,8 +152,13 @@ function animate() {
       controls.target.copy(planetInfo.planet.position); // Define o alvo do controle orbital
     }
 
-    planetInfo.angle += planetInfo.speed * ANIMATION_SPEED; // Incrementa o ângulo de translação do planeta
+    planetInfo.angle += planetInfo.speed * ANIMATION.SPEED; // Incrementa o ângulo de translação do planeta
   });
+
+  // Rotaciona o sol
+  if (!DEBUG.DISABLE_ROTATION) {
+    sun.rotation.y += ANIMATION.SPEED * 0.1;
+  }
 
   controls.update(); // Atualiza o controle orbital
   renderer.render(scene, camera); // Renderiza a cena
@@ -240,3 +258,41 @@ window.addEventListener(
   },
   false
 );
+
+// === GUI ===
+
+const gui = new GUI();
+
+const animationSpeedControl = gui.add(ANIMATION, "SPEED", 0, 0.2, 0.001);
+
+const folder = gui.addFolder("Debug");
+folder.add(DEBUG, "DISABLE_TRANSLATION");
+folder.add(DEBUG, "DISABLE_ROTATION");
+folder.add(DEBUG, "FOCUS_ON_INDEX", 0, 8, 1).onChange((value) => {
+  if (value === 0) {
+    // TODO: Ajustar isso
+    camera.position.set(0, 0, INITIAL_ZOOM);
+    camera.rotation.set(0, 0, 6.5);
+  }
+});
+
+// === Events ===
+
+document.addEventListener("keydown", (evt) => {
+  const handlers = {
+    ArrowUp: () => {
+      if (ANIMATION.SPEED < 0.2) {
+        ANIMATION.SPEED += 0.001;
+        animationSpeedControl.updateDisplay();
+      }
+    },
+    ArrowDown: () => {
+      if (ANIMATION.SPEED > 0) {
+        ANIMATION.SPEED -= 0.001;
+        animationSpeedControl.updateDisplay();
+      }
+    },
+  };
+
+  handlers[evt.key]?.();
+});
