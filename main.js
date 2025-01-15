@@ -8,20 +8,23 @@ const SUN_SCALE = 50;
 const AMBIENT_LIGHT_INTENSITY = 0.1; // DEFAULT: 0.1
 const SPACE_LIGHT_INTENSITY = 100; // DEFAULT: 100
 const SUN_LIGHT_INTENSITY = 5; // DEFAULT: 5
+const MAX_ANIMATION_SPEED = 200;
+const MIN_ANIMATION_SPEED = -200;
+const ANIMATION_SPEED_STEP = 5;
 
 // Animation parameters
 const ANIMATION = {
-  SPEED: 0.001,
+  SPEED: 5,
 };
 
 const DEBUG = {
   // Animation parameters
-  DISABLE_TRANSLATION: false, // DEFAULT: false
-  DISABLE_ROTATION: false, // DEFAULT: false
-  FOCUS_ON_INDEX: 0, // DEFAULT: false
+  DISABLE_TRANSLATION: false,
+  DISABLE_ROTATION: false,
+  FOCUS_ON_INDEX: 0,
 
   // CONSTANTS
-  AXIS_SIZE: 10000, // DEFAULT: 0
+  AXIS_SIZE: 1000, // DEFAULT: 0
 };
 
 // Câmera e cena
@@ -129,14 +132,18 @@ function animate() {
       planetInfo.planet.position.x =
         planetInfo.origin.x +
         planetInfo.orbitRadius * Math.cos(planetInfo.angle);
-      planetInfo.planet.position.y =
+      planetInfo.planet.position.z =
         planetInfo.origin.y +
         planetInfo.orbitRadius * Math.sin(planetInfo.angle);
+
+      planetInfo.angle -= planetInfo.speed * (ANIMATION.SPEED / 1000); // Incrementa o ângulo de translação do planeta
     }
 
     // Rotaciona o planeta
     if (!DEBUG.DISABLE_ROTATION) {
-      planetInfo.planet.rotation.y += ANIMATION.SPEED;
+      if (planetInfo.texture === "venus")
+        planetInfo.planet.rotation.y -= ANIMATION.SPEED / 1000;
+      else planetInfo.planet.rotation.y += ANIMATION.SPEED / 1000;
     }
 
     if (index + 1 === DEBUG.FOCUS_ON_INDEX) {
@@ -151,13 +158,11 @@ function animate() {
 
       controls.target.copy(planetInfo.planet.position); // Define o alvo do controle orbital
     }
-
-    planetInfo.angle += planetInfo.speed * ANIMATION.SPEED; // Incrementa o ângulo de translação do planeta
   });
 
   // Rotaciona o sol
   if (!DEBUG.DISABLE_ROTATION) {
-    sun.rotation.y += ANIMATION.SPEED * 0.1;
+    sun.rotation.y += (ANIMATION.SPEED / 1000) * 0.1;
   }
 
   controls.update(); // Atualiza o controle orbital
@@ -235,6 +240,7 @@ function addPlanet({
     angle: 0,
     speed,
     origin,
+    texture,
   };
 }
 
@@ -263,34 +269,62 @@ window.addEventListener(
 
 const gui = new GUI();
 
-const animationSpeedControl = gui.add(ANIMATION, "SPEED", 0, 0.2, 0.001);
+const animationSpeedControl = gui.add(
+  ANIMATION,
+  "SPEED",
+  MIN_ANIMATION_SPEED,
+  MAX_ANIMATION_SPEED,
+  ANIMATION_SPEED_STEP
+);
 
 const folder = gui.addFolder("Debug");
-folder.add(DEBUG, "DISABLE_TRANSLATION");
-folder.add(DEBUG, "DISABLE_ROTATION");
-folder.add(DEBUG, "FOCUS_ON_INDEX", 0, 8, 1).onChange((value) => {
-  if (value === 0) {
-    // TODO: Ajustar isso
-    camera.position.set(0, 0, INITIAL_ZOOM);
-    camera.rotation.set(0, 0, 6.5);
-  }
-});
+const disableTranslationControl = folder.add(DEBUG, "DISABLE_TRANSLATION");
+const disableRotationControl = folder.add(DEBUG, "DISABLE_ROTATION");
+const focusOnIndexControl = folder
+  .add(DEBUG, "FOCUS_ON_INDEX", 0, 8, 1)
+  .onChange((value) => {
+    if (value === 0) {
+      // TODO: Ajustar isso
+      camera.position.set(0, 0, INITIAL_ZOOM);
+      camera.rotation.set(0, 0, 6.5);
+    }
+  });
 
 // === Events ===
 
 document.addEventListener("keydown", (evt) => {
   const handlers = {
     ArrowUp: () => {
-      if (ANIMATION.SPEED < 0.2) {
-        ANIMATION.SPEED += 0.001;
+      if (ANIMATION.SPEED < MAX_ANIMATION_SPEED) {
+        ANIMATION.SPEED = ANIMATION.SPEED += ANIMATION_SPEED_STEP;
         animationSpeedControl.updateDisplay();
       }
     },
     ArrowDown: () => {
-      if (ANIMATION.SPEED > 0) {
-        ANIMATION.SPEED -= 0.001;
+      if (ANIMATION.SPEED > MIN_ANIMATION_SPEED) {
+        ANIMATION.SPEED = ANIMATION.SPEED -= ANIMATION_SPEED_STEP;
         animationSpeedControl.updateDisplay();
       }
+    },
+    ArrowLeft: () => {
+      if (DEBUG.FOCUS_ON_INDEX > 0) {
+        DEBUG.FOCUS_ON_INDEX--;
+        focusOnIndexControl.updateDisplay();
+      }
+    },
+    ArrowRight: () => {
+      if (DEBUG.FOCUS_ON_INDEX < 8) {
+        DEBUG.FOCUS_ON_INDEX++;
+        focusOnIndexControl.updateDisplay();
+      }
+    },
+    t: () => {
+      DEBUG.DISABLE_TRANSLATION = !DEBUG.DISABLE_TRANSLATION;
+      disableTranslationControl.updateDisplay();
+    },
+    r: () => {
+      DEBUG.DISABLE_ROTATION = !DEBUG.DISABLE_ROTATION;
+      disableRotationControl.updateDisplay();
     },
   };
 
