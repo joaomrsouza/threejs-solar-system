@@ -121,6 +121,17 @@ const planets = [
 // Inicia a animação
 animate();
 
+const moon = addMoon({
+  moonRadius: 0.5,
+  orbitRadius: 5,
+  speed: 1 / 0.5, 
+  origin: planets[2].planet.position,
+  texture: "moon",
+});
+
+// Relaciona a lua com a terra
+planets[2].moon = moon;
+
 // Função de animação
 function animate() {
   requestAnimationFrame(animate); // Requisita o próximo frame
@@ -138,6 +149,19 @@ function animate() {
 
       planetInfo.angle -= planetInfo.speed * (ANIMATION.SPEED / 1000); // Incrementa o ângulo de translação do planeta
     }
+
+    // Verifica se é a lua para adicionar ela a terra
+    if (planetInfo.texture === "earth" && planetInfo.moon) {
+      planetInfo.moon.moon.position.x =
+        planetInfo.planet.position.x +
+        planetInfo.moon.orbitRadius * Math.cos(planetInfo.moon.angle);
+      planetInfo.moon.moon.position.z =
+        planetInfo.planet.position.z +
+        planetInfo.moon.orbitRadius * Math.sin(planetInfo.moon.angle);
+  
+      planetInfo.moon.angle -= planetInfo.moon.speed * (ANIMATION.SPEED / 1000);
+    }
+
 
     // Rotaciona o planeta
     if (!DEBUG.DISABLE_ROTATION) {
@@ -207,6 +231,35 @@ function addSun() {
   return pointLight; // Retorna o ponto de luz do sol para manipulações futuras
 }
 
+function addMoon({ moonRadius, orbitRadius, speed, origin, texture }) {
+
+  // Textura e Geometria da Lua
+  const map = texture ? textureLoader.load(getTexturePath(texture)) : false; 
+
+  const geometry = new THREE.SphereGeometry(moonRadius);
+  const material = new THREE.MeshPhongMaterial({
+    ...(map
+      ? { map, bumpMap: map, bumpScale: 2 } 
+      : { color: 0xaaaaaa }),
+  });
+
+  const moon = new THREE.Mesh(geometry, material);
+
+
+  moon.position.x = origin.x + orbitRadius * Math.cos(0);
+  moon.position.z = origin.y + orbitRadius * Math.sin(0);
+
+  scene.add(moon);
+
+  return {
+    moon,
+    orbitRadius,
+    angle: 0,
+    speed,
+    origin,
+  };
+}
+
 // Adiciona um planeta à cena
 function addPlanet({
   planetRadius,
@@ -231,6 +284,11 @@ function addPlanet({
   planet.position.x = (SUN_SCALE + orbitRadius) * Math.cos(origin.x);
   planet.position.y = (SUN_SCALE + orbitRadius) * Math.sin(origin.y);
 
+  // Caso o planeta seja saturno, anéis são adicionados
+  if (texture === "saturn") {
+    addSaturnRings(planet);
+  }
+
   scene.add(planet);
 
   // Retorna as informações do planeta para manipulações futuras
@@ -241,17 +299,24 @@ function addPlanet({
     speed,
     origin,
     texture,
+    moon: null, // Para caso o planeta tenha uma lua
   };
 }
 
 // Retorna o caminho da textura de acordo com o tamanho selecionado
 function getTexturePath(textureName) {
+
+  // As texturas dos aneis de saturno estao no formato png
+  const isRing = textureName.includes("ring"); 
+  const extension = isRing ? "png" : "jpg";
+
+
   // Urano e Netuno possuem apenas texturas de 2k
   const size = ["uranus", "neptune"].includes(textureName)
     ? "2k"
     : TEXTURE_SIZE;
 
-  return `assets/${size}/${textureName}.jpg`;
+  return `assets/${size}/${textureName}.${extension}`;
 }
 
 // Atualiza a câmera e o renderizador ao redimensionar a janela
@@ -264,6 +329,25 @@ window.addEventListener(
   },
   false
 );
+
+
+// Adicionando os anéis de Saturno
+function addSaturnRings(saturn) {
+
+  // Geometria e textura dos anéis
+  const ringGeometry = new THREE.RingGeometry(8, 12, 64); 
+  const ringTexture = textureLoader.load(getTexturePath("saturn_ring")); 
+
+  const ringMaterial = new THREE.MeshBasicMaterial({
+    map: ringTexture,
+    side: THREE.DoubleSide, 
+    transparent: true, 
+  });
+
+  const rings = new THREE.Mesh(ringGeometry, ringMaterial);
+  rings.rotation.x = Math.PI / 2; 
+  saturn.add(rings); 
+}
 
 // === GUI ===
 
