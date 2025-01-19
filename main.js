@@ -3,11 +3,15 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 // CONSTANTS
 const TEXTURE_SIZE = ["2k", "8k"][0];
-const INITIAL_ZOOM = 200;
-const SUN_SCALE = 50;
+const SUN_SIZE_MULTIPLIER = 0.1;
+const PLANET_ORBIT_MULTIPLIER = 0.001;
+
+const SUN_SCALE = 399.88 * SUN_SIZE_MULTIPLIER;
+const INITIAL_ZOOM = SUN_SCALE * 5;
 const AMBIENT_LIGHT_INTENSITY = 0.1; // DEFAULT: 0.1
 const SPACE_LIGHT_INTENSITY = 100; // DEFAULT: 100
-const SUN_LIGHT_INTENSITY = 5; // DEFAULT: 5
+const SUN_LIGHT_INTENSITY = (1 / PLANET_ORBIT_MULTIPLIER) * SUN_SCALE;
+const SUN_TEXTURE_LIGHT_INTENSITY = 5; // DEFAULT: 5
 const MAX_ANIMATION_SPEED = 200;
 const MIN_ANIMATION_SPEED = -200;
 const ANIMATION_SPEED_STEP = 5;
@@ -33,7 +37,7 @@ const camera = new THREE.PerspectiveCamera(
   75,
   window.innerWidth / window.innerHeight,
   0.1,
-  50000
+  12941300
 );
 camera.position.set(0, 0, INITIAL_ZOOM);
 camera.rotation.set(0, 0, 0);
@@ -59,59 +63,60 @@ scene.add(new THREE.AxesHelper(DEBUG.AXIS_SIZE)); // Eixos de referência // TOD
 addSpace();
 const sun = addSun();
 
+// As medidas de orbita e raio são todas baseadas no diâmetro da lua (3476km = 1)
 const planets = [
   addPlanet({
-    planetRadius: 1,
-    orbitRadius: 15,
+    planetRadius: 1.4,
+    orbitRadius: PLANET_ORBIT_MULTIPLIER * 16657.08,
     speed: 1,
     origin: { x: 0, y: 0 },
     texture: "mercury",
   }),
   addPlanet({
-    planetRadius: 2,
-    orbitRadius: 30,
+    planetRadius: 3.48,
+    orbitRadius: PLANET_ORBIT_MULTIPLIER * 31130.46,
     speed: 1 / 2.89,
     origin: { x: 0, y: 0 },
     texture: "venus",
   }),
   addPlanet({
-    planetRadius: 3,
-    orbitRadius: 45,
+    planetRadius: 3.67,
+    orbitRadius: PLANET_ORBIT_MULTIPLIER * 43037.97,
     speed: 1 / 4.14,
     origin: { x: 0, y: 0 },
     texture: "earth",
   }),
   addPlanet({
-    planetRadius: 2,
-    orbitRadius: 60,
+    planetRadius: 1.95,
+    orbitRadius: PLANET_ORBIT_MULTIPLIER * 65575.37,
     speed: 1 / 7.8,
     origin: { x: 0, y: 0 },
     texture: "mars",
   }),
   addPlanet({
-    planetRadius: 9,
-    orbitRadius: 90,
+    planetRadius: 41.13,
+    orbitRadius: PLANET_ORBIT_MULTIPLIER * 223918.53,
     speed: 1 / 49.23,
     origin: { x: 0, y: 0 },
     texture: "jupiter",
   }),
   addPlanet({
-    planetRadius: 7,
-    orbitRadius: 120,
+    planetRadius: 34.68,
+    orbitRadius: PLANET_ORBIT_MULTIPLIER * 410433.38,
     speed: 1 / 122.26,
     origin: { x: 0, y: 0 },
     texture: "saturn",
   }),
   addPlanet({
-    planetRadius: 5,
-    orbitRadius: 150,
+    planetRadius: 14.71,
+    orbitRadius: PLANET_ORBIT_MULTIPLIER * 825941.37,
     speed: 1 / 348.71,
     origin: { x: 0, y: 0 },
     texture: "uranus",
   }),
   addPlanet({
-    planetRadius: 5,
-    orbitRadius: 180,
+    planetRadius: 14.25,
+    orbitRadius: PLANET_ORBIT_MULTIPLIER * 1294130.16,
     speed: 1 / 647.04,
     origin: { x: 0, y: 0 },
     texture: "neptune",
@@ -122,8 +127,8 @@ const planets = [
 animate();
 
 const moon = addMoon({
-  moonRadius: 0.5,
-  orbitRadius: 5,
+  moonRadius: 1,
+  orbitRadius: 11.052,
   speed: 1 / 0.5,
   origin: planets[2].planet.position,
   texture: "moon",
@@ -201,7 +206,7 @@ function animate() {
 function addSpace() {
   const texture = textureLoader.load(getTexturePath("space")); // Carrega a textura do espaço
 
-  const geometry = new THREE.SphereGeometry(10000);
+  const geometry = new THREE.SphereGeometry(12941300);
   const material = new THREE.MeshBasicMaterial({
     map: texture,
     side: THREE.DoubleSide, // Renderiza a textura em ambos os lados
@@ -217,14 +222,14 @@ function addSpace() {
 // Adiciona o sol à cena
 function addSun() {
   const texture = textureLoader.load(getTexturePath("sun")); // Carrega a textura do sol
-  const pointLight = new THREE.PointLight(0xffffff, 1000 * SUN_SCALE); // Ponto de Luz para o sol
+  const pointLight = new THREE.PointLight(0xffffff, SUN_LIGHT_INTENSITY); // Ponto de Luz para o sol
 
   const sunGeometry = new THREE.SphereGeometry(1 * SUN_SCALE);
   const sunMaterial = new THREE.MeshBasicMaterial({
     // color: 0xffff00,
     map: texture,
     lightMap: texture, // Textura de pontos de luz
-    lightMapIntensity: SUN_LIGHT_INTENSITY,
+    lightMapIntensity: SUN_TEXTURE_LIGHT_INTENSITY,
   });
   const sun = new THREE.Mesh(sunGeometry, sunMaterial);
 
@@ -301,7 +306,7 @@ function addSaturnRings(saturn) {
   // Geometria e textura dos anéis
   const ringTexture = textureLoader.load(getTexturePath("saturn_ring"));
 
-  const ringGeometry = new THREE.RingGeometry(8, 12, 64);
+  const ringGeometry = new THREE.RingGeometry(36.68, 59.68, 64);
   const ringMaterial = new THREE.MeshBasicMaterial({
     map: ringTexture,
     side: THREE.DoubleSide,
