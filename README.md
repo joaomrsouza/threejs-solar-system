@@ -77,15 +77,12 @@ O desenvolvimento do projeto foi estruturado em três etapas, a serem seguidas d
     - Implementação de pequenos ajustes;
     - Review final e alinhamento com a equipe;
     - Finalização dos registros e documentação;
-    - Entrega e apresnetação do projeto;
+    - Entrega e apresentação do projeto;
 
 ## Aprendizados:
 
-Como aprendizados obtidos durante o desenvolvimento do projeto destacamos primeiramente a compreensão de como os conceitos de Computação Gráfica são aplicados em projetos reais, além de observar como as características relacionadas a física interagem entre si em ambientes 3D simulados, próximo ao que acontece na realidade.
+Como aprendizados obtidos durante o desenvolvimento do projeto, destacamos a compreensão de como os conceitos de Computação Gráfica são aplicados em projetos reais, além de observar como as características da área podem ser tratadas. A oportunidade de criar e ver o retorno em representação gráfica 3D colabora para o aperfeiçoamento das percepções a cerca do assunto visto em sala de aula e a implementação das funcionalidades.
 
-A oportunidade de criar e ver o retorno em representação gráfica 3D colabora para o aperfeiçoamento das percepções a cerca da área e implementação das funcionalidades.
-
-Em segundo lugar, o processo de pesquisa relacionado ao desenvolvimento do projeto proporcionou uma boa compreensão de como funciona a dinâmica entre os Corpos Celestes presente no Sistema Solar, bem como identificar as nuances por trás de cada planeta, a fim de retrata-los da maneira mais fidedigna possível.
 ## Melhorias:
 
 As melhorias a serem implementadas em uma oportunidade futura giram em torno de aprimoramentos das funcionalidades, características visuais e interações já existentes, ajustes de escalas e adicionar novos elementos, como cinturões de asteróides, cometas e demais satélites existentes.
