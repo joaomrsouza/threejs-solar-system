@@ -31,6 +31,8 @@ Instalar a extensão [Live Server](https://marketplace.visualstudio.com/items?it
 
 Abrir o arquivo index.html com a extensão
 
+Para o manuseio das funcionalidades, há um controlador no canto superior direito que controla a velocidade dos eventos de translação, o planeta em foco, além de habilitar e desabilitar a translação e a rotação. É possível também controlar os movimentos via setas de navegação, os botôes "T" e "R" do teclado habilitam e desabilitam a translação e rotação respectivamente. Por fim, o botão scroll altera a distância da visualização.
+
 
 ## Tecnologias Utilizadas:
 - JavaScript
@@ -52,6 +54,7 @@ Abrir o arquivo index.html com a extensão
 - Rotação dos planetas em seu próprio eixo;
 - Mudança de velocidade dos Corpos Celestes, por meio de teclas;
 - Velocidade, tamanho e distância proporcionais;
+- Influência da luz solar nos elementos;
 
 
 ## Etapas do Projeto:
@@ -85,7 +88,7 @@ A oportunidade de criar e ver o retorno em representação gráfica 3D colabora 
 Em segundo lugar, o processo de pesquisa relacionado ao desenvolvimento do projeto proporcionou uma boa compreensão de como funciona a dinâmica entre os Corpos Celestes presente no Sistema Solar, bem como identificar as nuances por trás de cada planeta, a fim de retrata-los da maneira mais fidedigna possível.
 ## Melhorias:
 
-As melhorias a serem implementadas em uma oportunidade futura giram em torno de aprimoramentos das funcionalidades, características visuais e interações já existentes, tratar a influência da luz com os corpos celestes, ajustes de escalas e adicionar novos elementos, como cinturões de asteróides, cometas e demais satélites existentes.
+As melhorias a serem implementadas em uma oportunidade futura giram em torno de aprimoramentos das funcionalidades, características visuais e interações já existentes, ajustes de escalas e adicionar novos elementos, como cinturões de asteróides, cometas e demais satélites existentes.
 
 Com a inclusão destas melhorias, abre-se a oportunidade de escalonar o projeto com outras vertentes, como a implantação da visualização em um site educativo/informativo, dentre outras possibilidades.
 
@@ -102,12 +105,39 @@ Com a inclusão destas melhorias, abre-se a oportunidade de escalonar o projeto 
 
 ## Imagens do Projeto:
 
-![App Screenshot](https://via.placeholder.com/468x300?text=App+Screenshot+Here)
+Sistema Solar:
+![Sistema Solar](https://github.com/joaomrsouza/threejs-solar-system/blob/main/assets/images/sistema%20solar.jpg)
 
+Sol:
+![Sol](https://github.com/joaomrsouza/threejs-solar-system/blob/main/assets/images/sol.jpg)
+
+Mercúrio:
+![Mercurio](https://github.com/joaomrsouza/threejs-solar-system/blob/main/assets/images/mercurio.jpg)
+
+Vênus:
+![Venus](https://github.com/joaomrsouza/threejs-solar-system/blob/main/assets/images/venus.jpg)
+
+Terra:
+![Terra](https://github.com/joaomrsouza/threejs-solar-system/blob/main/assets/images/terra.jpg)
+
+Marte:
+![Marte](https://github.com/joaomrsouza/threejs-solar-system/blob/main/assets/images/marte.jpg)
+
+Júpiter:
+![Júpiter](https://github.com/joaomrsouza/threejs-solar-system/blob/main/assets/images/jupiter.jpg)
+
+Saturno:
+![Saturno](https://github.com/joaomrsouza/threejs-solar-system/blob/main/assets/images/saturno.jpg)
+
+Urano:
+![Urano](https://github.com/joaomrsouza/threejs-solar-system/blob/main/assets/images/urano.jpg)
+
+Netuno:
+![Netuno](https://github.com/joaomrsouza/threejs-solar-system/blob/main/assets/images/netuno.jpg)
 
 ## Vídeos de Demonstração:
 
- - [Documentação Three.js](https://threejs.org/docs/index.html#manual/en/introduction)
+ - [Vídeo demonstrativo do projeto e suas funcionalidades (YouTube)](https://youtu.be/ZyKWKlwF5sg?si=hXEEPFxqkJ6AxPQH)
 ## Feedback:
 
 Agradecemos qualquer Feedback ou sugestões de melhorias sobre o projeto! 
