@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 // CONSTANTS
-const TEXTURE_SIZE = ["2k", "8k"][0];
+const TEXTURE_SIZE = ["2k", "8k"][1];
 const SUN_SIZE_MULTIPLIER = 0.1;
 const PLANET_ORBIT_MULTIPLIER = 0.001;
 
@@ -28,7 +28,7 @@ const DEBUG = {
   FOCUS_ON_INDEX: 0,
 
   // CONSTANTS
-  AXIS_SIZE: 1000, // DEFAULT: 0
+  AXIS_SIZE: 0, // DEFAULT: 0
 };
 
 // Câmera e cena
@@ -57,7 +57,7 @@ const textureLoader = new THREE.TextureLoader(); // Carrega texturas
 
 scene.add(new THREE.AmbientLight(0xffffff, AMBIENT_LIGHT_INTENSITY)); // Luz ambiente
 
-scene.add(new THREE.AxesHelper(DEBUG.AXIS_SIZE)); // Eixos de referência // TODO: Remover (Temporário)
+scene.add(new THREE.AxesHelper(DEBUG.AXIS_SIZE)); // Eixos de referência
 
 // Elementos da cena
 addSpace();
@@ -126,11 +126,12 @@ const planets = [
 // Inicia a animação
 animate();
 
+// Adiciona a lua a cena
 const moon = addMoon({
   moonRadius: 1,
-  orbitRadius: 11.052,
+  orbitRadius: 11.05,
   speed: 1 / 0.5,
-  origin: planets[2].planet.position,
+  origin: planets[2].planet.position, // Origem inicial na Terra
   texture: "moon",
 });
 
@@ -170,6 +171,7 @@ function animate() {
 
     // Rotaciona o planeta
     if (!DEBUG.DISABLE_ROTATION) {
+      // Vênus gira ao contrário
       if (planetInfo.texture === "venus")
         planetInfo.planet.rotation.y -= ANIMATION.SPEED / 1000;
       else planetInfo.planet.rotation.y += ANIMATION.SPEED / 1000;
@@ -226,7 +228,6 @@ function addSun() {
 
   const sunGeometry = new THREE.SphereGeometry(1 * SUN_SCALE);
   const sunMaterial = new THREE.MeshBasicMaterial({
-    // color: 0xffff00,
     map: texture,
     lightMap: texture, // Textura de pontos de luz
     lightMapIntensity: SUN_TEXTURE_LIGHT_INTENSITY,
@@ -237,20 +238,20 @@ function addSun() {
   pointLight.add(sun);
   scene.add(pointLight);
 
-  return pointLight; // Retorna o ponto de luz do sol para manipulações futuras
+  return pointLight; // Retorna o ponto de luz com sol para manipulações futuras
 }
 
 function addMoon({ moonRadius, orbitRadius, speed, origin, texture }) {
-  // Textura e Geometria da Lua
-  const map = texture ? textureLoader.load(getTexturePath(texture)) : false;
+  const map = texture ? textureLoader.load(getTexturePath(texture)) : false; // Carrega a textura da Lua
 
   const geometry = new THREE.SphereGeometry(moonRadius);
   const material = new THREE.MeshPhongMaterial({
-    ...(map ? { map, bumpMap: map, bumpScale: 2 } : { color: 0xaaaaaa }),
+    ...(map ? { map, bumpMap: map, bumpScale: 2 } : { color: 0xaaaaaa }), // Adiciona a textura e o relevo
   });
 
   const moon = new THREE.Mesh(geometry, material);
 
+  // Define a posição inicial da lua em sua órbita
   moon.position.x = origin.x + orbitRadius * Math.cos(0);
   moon.position.z = origin.y + orbitRadius * Math.sin(0);
 
@@ -282,7 +283,7 @@ function addPlanet({ planetRadius, orbitRadius, speed, origin, texture }) {
   planet.position.x = (SUN_SCALE + orbitRadius) * Math.cos(origin.x);
   planet.position.y = (SUN_SCALE + orbitRadius) * Math.sin(origin.y);
 
-  // Caso o planeta seja saturno, anéis são adicionados
+  // Caso o planeta seja saturno, os anéis são adicionados
   if (texture === "saturn") {
     addSaturnRings(planet);
   }
@@ -306,7 +307,7 @@ function addSaturnRings(saturn) {
   // Geometria e textura dos anéis
   const ringTexture = textureLoader.load(getTexturePath("saturn_ring"));
 
-  const ringGeometry = new THREE.RingGeometry(36.68, 59.68, 64);
+  const ringGeometry = new THREE.RingGeometry(36.68, 59.68, 64); // Tamanho calculado com base no tamanho atual do planeta
   const ringMaterial = new THREE.MeshBasicMaterial({
     map: ringTexture,
     side: THREE.DoubleSide,
@@ -314,18 +315,19 @@ function addSaturnRings(saturn) {
   });
 
   const rings = new THREE.Mesh(ringGeometry, ringMaterial);
+
   rings.rotation.x = Math.PI / 2;
+
   saturn.add(rings);
 }
 
 // Retorna o caminho da textura de acordo com o tamanho selecionado
 function getTexturePath(textureName) {
   // As texturas dos anéis de saturno estão no formato png
-  const isRing = textureName.includes("ring");
-  const extension = isRing ? "png" : "jpg";
+  const extension = textureName === "saturn_ring" ? "png" : "jpg";
 
-  // Urano e Netuno possuem apenas texturas de 2k
-  const size = ["uranus", "neptune"].includes(textureName)
+  // Urano, Netuno e os aneis de Saturno possuem apenas texturas de 2k
+  const size = ["uranus", "neptune", "saturn_ring"].includes(textureName)
     ? "2k"
     : TEXTURE_SIZE;
 
@@ -347,6 +349,7 @@ window.addEventListener(
 
 const gui = new GUI();
 
+// Adiciona o controle de velocidade
 const animationSpeedControl = gui.add(
   ANIMATION,
   "SPEED",
@@ -355,14 +358,15 @@ const animationSpeedControl = gui.add(
   ANIMATION_SPEED_STEP
 );
 
+// Adiciona o submenu de debug
 const folder = gui.addFolder("Debug");
-const disableTranslationControl = folder.add(DEBUG, "DISABLE_TRANSLATION");
-const disableRotationControl = folder.add(DEBUG, "DISABLE_ROTATION");
+const disableTranslationControl = folder.add(DEBUG, "DISABLE_TRANSLATION"); // Controle de translação
+const disableRotationControl = folder.add(DEBUG, "DISABLE_ROTATION"); // Controle de rotação
+// Controle de foco
 const focusOnIndexControl = folder
   .add(DEBUG, "FOCUS_ON_INDEX", 0, 8, 1)
   .onChange((value) => {
     if (value === 0) {
-      // TODO: Ajustar isso
       camera.position.set(0, 0, INITIAL_ZOOM);
       camera.rotation.set(0, 0, 6.5);
     }
@@ -372,34 +376,40 @@ const focusOnIndexControl = folder
 
 document.addEventListener("keydown", (evt) => {
   const handlers = {
+    // Aumenta velocidade de animação
     ArrowUp: () => {
       if (ANIMATION.SPEED < MAX_ANIMATION_SPEED) {
         ANIMATION.SPEED = ANIMATION.SPEED += ANIMATION_SPEED_STEP;
         animationSpeedControl.updateDisplay();
       }
     },
+    // Dominui velocidade de animação
     ArrowDown: () => {
       if (ANIMATION.SPEED > MIN_ANIMATION_SPEED) {
         ANIMATION.SPEED = ANIMATION.SPEED -= ANIMATION_SPEED_STEP;
         animationSpeedControl.updateDisplay();
       }
     },
+    // Foca no próximo planeta
     ArrowLeft: () => {
       if (DEBUG.FOCUS_ON_INDEX > 0) {
         DEBUG.FOCUS_ON_INDEX--;
         focusOnIndexControl.updateDisplay();
       }
     },
+    // Foca no planeta anterior
     ArrowRight: () => {
       if (DEBUG.FOCUS_ON_INDEX < 8) {
         DEBUG.FOCUS_ON_INDEX++;
         focusOnIndexControl.updateDisplay();
       }
     },
+    // Altera a translação
     t: () => {
       DEBUG.DISABLE_TRANSLATION = !DEBUG.DISABLE_TRANSLATION;
       disableTranslationControl.updateDisplay();
     },
+    // Altera a rotação
     r: () => {
       DEBUG.DISABLE_ROTATION = !DEBUG.DISABLE_ROTATION;
       disableRotationControl.updateDisplay();
